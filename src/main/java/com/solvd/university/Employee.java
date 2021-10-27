@@ -40,8 +40,14 @@ public class Employee extends Person {
 
     @Override
     public String toString() {
+        String prefix;
+        if (EmployeePosition.MANAGER.equals(this.position)) {
+            prefix = "Mr.";
+        } else {
+            prefix = "Resp.";
+        }
         return String.format(
-                "%s %s %s - %s", this.getSurname(), this.getName(), this.getPatronymic(), this.position);
+                "%s %s %s %s - %s", prefix, this.getSurname(), this.getName(), this.getPatronymic(), this.position);
     }
 
     @Override
