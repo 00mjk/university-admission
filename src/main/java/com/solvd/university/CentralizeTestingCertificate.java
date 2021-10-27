@@ -55,6 +55,7 @@ public class CentralizeTestingCertificate extends Certificate {
                 break;
             default:
                 resultString = "Centralize Testing Certificate";
+                break;
         }
         return resultString;
     }

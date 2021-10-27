@@ -3,7 +3,7 @@ package com.solvd.university;
 public enum EmployeePosition {
     TEACHER("Teacher"), MANAGER("Manager");
 
-    final String position;
+    private final String position;
 
     EmployeePosition(String position) {
         this.position = position;
