@@ -45,6 +45,18 @@ public class CentralizeTestingCertificate extends Certificate {
 
     @Override
     public String getCertificateType() {
-        return "Centralize Testing Certificate";
+        String resultString;
+        switch (subject) {
+            case PHYSICS:
+                resultString = "Tech. Centralize Testing Certificate";
+                break;
+            case HISTORY:
+                resultString = "Humanit. Centralize Testing Certificate";
+                break;
+            default:
+                resultString = "Centralize Testing Certificate";
+                break;
+        }
+        return resultString;
     }
 }

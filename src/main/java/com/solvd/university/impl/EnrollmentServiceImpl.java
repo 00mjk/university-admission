@@ -46,6 +46,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 break;
             default:
                 specTypeClass = "";
+                break;
         }
         for (SpecializationPlan sp : specializationPlans) {
             if (sp.getClass().getSimpleName().equals(specTypeClass)) {
