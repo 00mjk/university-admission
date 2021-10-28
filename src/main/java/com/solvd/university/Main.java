@@ -10,6 +10,9 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -21,7 +24,7 @@ import java.util.stream.Collectors;
 
 public class Main {
 
-    public static void main(String[] args) throws PersonInvalidDataException, IOException, URISyntaxException {
+    public static void main(String[] args) throws PersonInvalidDataException, IOException, URISyntaxException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchFieldException {
 
         Logger logger = LogManager.getLogger(Main.class);
 
@@ -197,5 +200,47 @@ public class Main {
             outputStream.write(outputLine.getBytes(StandardCharsets.UTF_8));
             logger.info(outputLine);
         }
+
+        logger.info("################# Reflection example #################");
+
+        logger.debug("Get object represent BachelorEntrantForm class");
+        Class<BachelorEntrantForm> bachEntrFormClass = BachelorEntrantForm.class;
+        logger.debug("Get BachelorEntrantForm class constructor");
+        //TODO Style: whether to wrap the parenthesis to the next line?
+        Constructor<?> bachelorEntrantFormConstructor = bachEntrFormClass.getConstructor(
+                Integer.class,
+                Entrant.class,
+                SpecializationPlan.class,
+                boolean.class,
+                Employee.class,
+                LocalDate.class,
+                List.class
+        );
+        logger.debug("Create BachelorEntrantForm object");
+        BachelorEntrantForm reflbachelorEntrantForm = (BachelorEntrantForm) bachelorEntrantFormConstructor.newInstance(
+                4, entrant, specializationPlans.get(2), true, employee,
+                LocalDate.of(2021, 10, 28), certificates
+        );
+
+        reflbachelorEntrantForm.setAcceptedDate(LocalDate.of(2020, 12, 13));
+        logger.debug(reflbachelorEntrantForm);
+
+        logger.debug(reflbachelorEntrantForm.getSpecializationPlan());
+
+        logger.info(String.format("BachelorEnrantForm #simpleName() result: %s", bachEntrFormClass.getSimpleName()));
+        logger.info(String.format("BachelorEnrantForm #getClassLoader() result: %s", bachEntrFormClass.getClassLoader()));
+        logger.info(String.format("BachelorEnrantForm #getName() result: %s", bachEntrFormClass.getName()));
+        logger.info(String.format("BachelorEnrantForm #getCanonicalName() result: %s", bachEntrFormClass.getCanonicalName()));
+        logger.info(String.format("BachelorEnrantForm #getMethods() result: %s", Arrays.toString(bachEntrFormClass.getMethods())));
+        logger.info(String.format("BachelorEnrantForm #getFields() result: %s", Arrays.toString(bachEntrFormClass.getFields())));
+        logger.info(String.format("BachelorEnrantForm #getPackage() result: %s", bachEntrFormClass.getPackage()));
+        logger.info(String.format("BachelorEnrantForm #toGenericString() result: %s", bachEntrFormClass.toGenericString()));
+        logger.info(String.format("BachelorEnrantForm #getSuperclass() result: %s", bachEntrFormClass.getSuperclass()));
+        logger.info(String.format("BachelorEnrantForm #isAnonymousClass() result: %s", bachEntrFormClass.isAnonymousClass()));
+
+        logger.debug("Work with BachelorEntrantForm's certificate field😃");
+        Field certificateField = bachEntrFormClass.getDeclaredField("certificates");
+        Class<?> certificateFieldType = certificateField.getType();
+        logger.info(String.format("CertificaeField type: %s", certificateFieldType));
     }
 }
