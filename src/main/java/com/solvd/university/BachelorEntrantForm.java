@@ -55,10 +55,8 @@ public class BachelorEntrantForm extends EntrantForm {
     }
 
     public Integer getTotalMark() {
-        Integer totalMark = 0;
-        for (Certificate certificate : this.certificates) {
-            totalMark += certificate.getMark();
-        }
-        return totalMark;
+        return certificates.stream()
+                .map(Certificate::getMark)
+                .reduce(0, Integer::sum);
     }
 }

@@ -1,4 +1,4 @@
-package com.solvd.university.func;
+package com.solvd.university;
 
 public interface Converter<T, R> {
 

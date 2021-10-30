@@ -1,6 +1,5 @@
 package com.solvd.university;
 
-import com.solvd.university.func.Converter;
 import com.solvd.university.impl.EnrollmentServiceImpl;
 import com.solvd.university.impl.InformationCommiteeServiceImpl;
 import org.apache.commons.io.FileUtils;
@@ -10,20 +9,21 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Main {
 
@@ -133,18 +133,15 @@ public class Main {
         logger.info(informationCommiteeService.getPersonShortName(employee));
 
         logger.info("###### Interface using example ######");
-        for (Accessible a : specializationPlans) {
-            logger.info(String.format("Is free places accessible: %b", a.isFreePlacesAccessible()));
-            logger.info(String.format("Is paid places accessible: %b", a.isPaidPlacesAccessible()));
-        }
+        specializationPlans.forEach(sp -> {
+            logger.info(String.format("Is free places accessible: %b \n Is paid places accessible: %b",
+                    sp.isFreePlacesAccessible(), sp.isPaidPlacesAccessible()));
+        });
 
         boolean validationResult = informationCommiteeService.isValidDocument(bachelorEntrantForm);
         logger.info(String.format("Baachelor's entrant form is: %s", validationResult ? "VALID" : "INVALID"));
-
         logger.info(informationCommiteeService.askAboutCurrentDateTime(entrant));
-
         logger.info(String.format("Can entrable to high education: %b", enrollmentService.canEntrableToHighEducation(entrant)));
-
         logger.info("Abbreviation: " + informationCommiteeService.getAbbreviation(university));
 
         logger.info("Example with try with resourcces");
@@ -178,38 +175,35 @@ public class Main {
         Map<String, Integer> fileWords = new HashMap<>();
         URI harryPotterPath = Objects.requireNonNull(Main.class.getClassLoader().getResource(harryPotterBook.getFileName())).toURI();
         File harryPotterFile = new File(Objects.requireNonNull(harryPotterPath));
-        Pattern wordPattern = Pattern.compile("[a-zA-Z]+");
 
         List<String> lines = FileUtils.readLines(harryPotterFile, "UTF-8");
-        for (String line : lines) {
-            Matcher matcher = wordPattern.matcher(line);
-            while (matcher.find()) {
-                String word = StringUtils.lowerCase(matcher.group());
-                Integer count = fileWords.get(word);
-                if (Objects.isNull(count)) {
-                    count = 0;
-                }
-                fileWords.put(word, ++count);
-            }
-        }
+        lines.forEach(line -> {
+            Arrays.stream(line.split("\\P{L}+"))
+                    .map(StringUtils::lowerCase)
+                    .forEach(word -> {
+                        Integer count = fileWords.get(word);
+                        if (Objects.isNull(count)) {
+                            count = 0;
+                        }
+                        fileWords.put(word, ++count);
+                    });
+        });
 
-        Map<String, Integer> sortedWords = fileWords.entrySet().stream().sorted(Map.Entry.comparingByValue())
+        Map<String, Integer> sortedWords = fileWords.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue())
+                .peek(logger::debug)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 
-        File outputFile = new File("ofiles/words_length_info.txt");
-        OutputStream outputStream = FileUtils.openOutputStream(outputFile);
-        for (Map.Entry<String, Integer> word : sortedWords.entrySet()) {
-            String outputLine = String.format("%s\t- %d times\n", word.getKey(), word.getValue());
-            outputStream.write(outputLine.getBytes(StandardCharsets.UTF_8));
-            logger.info(outputLine);
-        }
+        Path outputWordsPath = Paths.get("ofiles/words_length_info.txt");
+        Files.write(outputWordsPath,
+                (Iterable<String>) sortedWords.entrySet().stream()
+                        .map(word -> String.format("%s\t- %d times\n", word.getKey(), word.getValue()))::iterator);
 
         logger.info("################# Reflection example #################");
 
         logger.debug("Get object represent BachelorEntrantForm class");
         Class<BachelorEntrantForm> bachEntrFormClass = BachelorEntrantForm.class;
         logger.debug("Get BachelorEntrantForm class constructor");
-        //TODO Style: whether to wrap the parenthesis to the next line?
         Constructor<?> bachelorEntrantFormConstructor = bachEntrFormClass.getConstructor(
                 Integer.class,
                 Entrant.class,
@@ -273,5 +267,31 @@ public class Main {
         //TODO Supplier
         //TODO Function
         //TODO UnaryOperator
+
+        logger.info("################# Stream API example #################");
+        List<Certificate> filteredCert = certificates.stream()
+                .filter(cert -> cert.getMark() > 20)
+                .collect(Collectors.toList());
+        logger.debug(filteredCert);
+
+        List<String> departNames = departments.stream()
+                .map(Department::getName)
+                .collect(Collectors.toList());
+        logger.debug(departNames);
+
+        List<String> hpLines = FileUtils.readLines(harryPotterFile, "UTF-8");
+        List<String> filteredWords = hpLines.stream()
+                .flatMap(line -> Stream.of(line.split("[^a-zA-Z]+}")))
+                .limit(15)
+                .collect(Collectors.toList());
+        logger.debug(filteredWords);
+
+        Optional<String> empAnswer = employeeAnswers.values().stream().findFirst();
+        logger.debug(empAnswer.orElse("There are no employee answer"));
+
+        Optional<Date> randomSpecLastUpdate = specializationPlans.stream()
+                .map(SpecializationPlan::getLastUpdate)
+                .findAny();
+        logger.debug(randomSpecLastUpdate.orElseThrow(() -> new RuntimeException("There are no last update date for random specialisation")));
     }
 }
