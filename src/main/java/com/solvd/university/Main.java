@@ -1,5 +1,6 @@
 package com.solvd.university;
 
+import com.solvd.university.func.Converter;
 import com.solvd.university.impl.EnrollmentServiceImpl;
 import com.solvd.university.impl.InformationCommiteeServiceImpl;
 import org.apache.commons.io.FileUtils;
@@ -18,6 +19,8 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -242,5 +245,33 @@ public class Main {
         Field certificateField = bachEntrFormClass.getDeclaredField("certificates");
         Class<?> certificateFieldType = certificateField.getType();
         logger.info(String.format("CertificaeField type: %s", certificateFieldType));
+
+        logger.info("################# Functional interface and lambda example #################");
+
+        Converter<CentralizeTestingCertificate, HighSchoolCertificate> converter = centraliseCert ->
+        {
+            HighSchoolCertificate certificate = new HighSchoolCertificate(centraliseCert.getId(), 0);
+            certificate.setMark(centraliseCert.getMark());
+            return certificate;
+        };
+
+        logger.debug("Convert Centralize Testing Certificate to High school Certificate");
+        HighSchoolCertificate highSchoolCertificate = converter.convert(new CentralizeTestingCertificate(234134113, Subject.CHEMISTRY, 89));
+        logger.info(highSchoolCertificate);
+
+        logger.debug("Predicate example - check is Entrant form valid");
+        Predicate<EntrantForm> isEntrantFormValid = form -> form.isValidDate() && form.isValidIdentificator();
+        logger.info(isEntrantFormValid.test(bachelorEntrantForm));
+
+        logger.debug("Consumer example - print Person(Employee) name and current date");
+        Consumer<Person> ask = person -> {
+            assert person != null;
+            logger.info(String.format("I'm %s. Current date is %s", person.shortNameFormat(), person.sayCurrentDate()));
+        };
+        ask.accept(employee);
+
+        //TODO Supplier
+        //TODO Function
+        //TODO UnaryOperator
     }
 }
