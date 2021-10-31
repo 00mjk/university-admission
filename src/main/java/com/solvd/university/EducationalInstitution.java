@@ -7,18 +7,12 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 
+@Getter
+@Setter
 public abstract class EducationalInstitution implements Abbreviable {
 
-    @Getter
-    @Setter
     private String name;
-
-    @Getter
-    @Setter
     private Date basedDate;
-
-    @Getter
-    @Setter
     private City city;
 
     public EducationalInstitution(String name) {

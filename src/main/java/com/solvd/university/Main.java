@@ -3,7 +3,6 @@ package com.solvd.university;
 import com.solvd.university.impl.EnrollmentServiceImpl;
 import com.solvd.university.impl.InformationCommiteeServiceImpl;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,6 +19,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -169,24 +169,17 @@ public class Main {
         harryPotterBook.setFileName("J. K. Rowling - Harry Potter 1 - Sorcerer's Stone.txt");
         harryPotterBook.setGenre(Genre.FANTASTIC);
 
-        Map<String, Integer> fileWords = new HashMap<>();
         URI harryPotterPath = Objects.requireNonNull(Main.class.getClassLoader().getResource(harryPotterBook.getFileName())).toURI();
         File harryPotterFile = new File(Objects.requireNonNull(harryPotterPath));
 
         List<String> lines = FileUtils.readLines(harryPotterFile, "UTF-8");
-        lines.forEach(line -> {
-            Arrays.stream(line.split("\\P{L}+"))
-                    .map(StringUtils::lowerCase)
-                    .forEach(word -> {
-                        Integer count = fileWords.get(word);
-                        if (Objects.isNull(count)) {
-                            count = 0;
-                        }
-                        fileWords.put(word, ++count);
-                    });
-        });
 
-        Map<String, Integer> sortedWords = fileWords.entrySet().stream()
+        Map<String, Long> fileWords = Stream.of(lines)
+                .flatMap(Collection::stream)
+                .flatMap(str -> Arrays.stream(str.split("\\P{L}+")))
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+        Map<String, Long> sortedWords = fileWords.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue())
                 .peek(logger::debug)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));

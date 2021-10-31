@@ -6,10 +6,10 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@Getter
+@Setter
 public class CentralizeTestingCertificate extends Certificate {
 
-    @Getter
-    @Setter
     private Subject subject;
 
     public CentralizeTestingCertificate(Integer id, Subject subject, Integer mark) {

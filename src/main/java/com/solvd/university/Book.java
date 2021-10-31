@@ -6,16 +6,13 @@ import lombok.Setter;
 
 import java.util.Objects;
 
+@Getter(AccessLevel.PUBLIC)
+@Setter(AccessLevel.PUBLIC)
 public class Book {
 
     private static Book book;
 
-    @Getter(AccessLevel.PUBLIC)
-    @Setter(AccessLevel.PUBLIC)
     private String fileName;
-
-    @Getter(AccessLevel.PUBLIC)
-    @Setter(AccessLevel.PUBLIC)
     private Genre genre;
 
     private Book() {

@@ -9,10 +9,10 @@ import java.util.List;
 /**
  * Application for higher education of the 1st stage (Bachelor's degree)
  */
+@Getter
+@Setter
 public class BachelorEntrantForm extends EntrantForm {
 
-    @Getter
-    @Setter
     private List<Certificate> certificates;
 
     public BachelorEntrantForm(
@@ -27,7 +27,7 @@ public class BachelorEntrantForm extends EntrantForm {
         super(id, entrant, specializationPlan, paid, issuedBy, acceptedDate);
         this.certificates = certificates;
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

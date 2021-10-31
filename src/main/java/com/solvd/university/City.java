@@ -5,10 +5,10 @@ import lombok.Setter;
 
 import java.util.Objects;
 
+@Getter
+@Setter
 public class City {
-
-    @Getter
-    @Setter
+    
     private String name;
 
     public City(String name) {

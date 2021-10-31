@@ -6,14 +6,11 @@ import lombok.Setter;
 import java.util.List;
 import java.util.Objects;
 
+@Getter
+@Setter
 public class Department {
 
-    @Getter
-    @Setter
     private String name;
-
-    @Getter
-    @Setter
     private List<Specialization> specializations;
 
     public Department(String name, List<Specialization> specializations) {

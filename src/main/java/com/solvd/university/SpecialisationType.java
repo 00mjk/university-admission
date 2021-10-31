@@ -2,10 +2,10 @@ package com.solvd.university;
 
 import lombok.Getter;
 
+@Getter
 public enum SpecialisationType {
     FULL("full"), DISTANCE("distance");
 
-    @Getter
     private final String lowerStr;
 
     SpecialisationType(String lowerStr) {

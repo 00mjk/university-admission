@@ -8,14 +8,12 @@ import lombok.Setter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Getter
+@Setter
 public class EnrollmentServiceImpl implements EnrollmentService {
 
-    @Getter
-    @Setter
     private List<SpecializationPlan> specializationPlans;
 
-    @Getter
-    @Setter
     private List<EntrantForm> entrantForms;
 
     public EnrollmentServiceImpl(List<SpecializationPlan> specializationPlans) {
