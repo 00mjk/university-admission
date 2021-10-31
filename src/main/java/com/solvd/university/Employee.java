@@ -46,6 +46,7 @@ public class Employee extends Person {
     }
 
     @Override
+    @Deprecated
     public String shortNameFormat() {
         return String.format("%s. - %s", super.shortNameFormat(), this.position);
     }

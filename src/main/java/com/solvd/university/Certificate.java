@@ -1,5 +1,7 @@
 package com.solvd.university;
 
+import lombok.NonNull;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -14,7 +16,7 @@ public abstract class Certificate {
     private Integer mark;
     private LocalDateTime issuedAt;
 
-    public Certificate(Integer id, Integer mark) {
+    public Certificate(@NonNull Integer id, @NonNull Integer mark) {
         if (id < MIN_ID || id > MAX_ID || mark < MIN_MARK || mark > MAX_MARK) {
             throw new CertificateInvalidDataException("Certificate data should be valid");
         }
@@ -23,7 +25,7 @@ public abstract class Certificate {
         this.issuedAt = LocalDateTime.now();
     }
 
-    public Certificate(Integer id, Integer mark, LocalDateTime issuedAt) {
+    public Certificate(@NonNull Integer id, @NonNull Integer mark, @NonNull LocalDateTime issuedAt) {
         this(id, mark);
         if (Objects.isNull(issuedAt)) {
             throw new CertificateInvalidDataException("Certificate data should exists");
