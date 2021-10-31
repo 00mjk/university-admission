@@ -1,8 +1,13 @@
 package com.solvd.university;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 import java.util.Objects;
 
+@Getter
+@Setter
 public class Department {
 
     private String name;
@@ -10,22 +15,6 @@ public class Department {
 
     public Department(String name, List<Specialization> specializations) {
         this.name = name;
-        this.specializations = specializations;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public List<Specialization> getSpecializations() {
-        return specializations;
-    }
-
-    public void setSpecializations(List<Specialization> specializations) {
         this.specializations = specializations;
     }
 

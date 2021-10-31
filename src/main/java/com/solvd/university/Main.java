@@ -3,25 +3,31 @@ package com.solvd.university;
 import com.solvd.university.impl.EnrollmentServiceImpl;
 import com.solvd.university.impl.InformationCommiteeServiceImpl;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Main {
 
-    public static void main(String[] args) throws PersonInvalidDataException, IOException, URISyntaxException {
+    public static void main(String[] args) throws PersonInvalidDataException, IOException, URISyntaxException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchFieldException {
 
         Logger logger = LogManager.getLogger(Main.class);
 
@@ -31,7 +37,6 @@ public class Main {
         cities.add(new City("Brest"));
 
         List<Department> departments = new ArrayList<>();
-
         List<Specialization> specializations = new ArrayList<>();
         try {
             specializations.add(new Specialization("Automation of technological processes and productions"));
@@ -94,22 +99,21 @@ public class Main {
         EntrantForm bachelorEntrantForm =
                 new BachelorEntrantForm(65, entrant, specializationPlans.get(0), true, employee, LocalDate.of(2021, 8, 2), certificates);
 
-        EntrantForm masterEntrantForm =
-                new MasterEntrantForm(
-                        1355235,
-                        entrant,
-                        specializationPlans.get(2),
-                        false,
-                        employee,
-                        LocalDate.of(2020, 6, 30),
-                        specializations.get(1),
-                        LocalDate.now()
-                );
+        EntrantForm masterEntrantForm = new MasterEntrantForm(
+                1355235,
+                entrant,
+                specializationPlans.get(2),
+                false,
+                employee,
+                LocalDate.of(2020, 6, 30),
+                specializations.get(1),
+                LocalDate.now()
+        );
 
         EnrollmentService enrollmentService = new EnrollmentServiceImpl(specializationPlans);
         InformationCommiteeService informationCommiteeService = new InformationCommiteeServiceImpl();
         logger.info("Available specialisations:");
-        logger.info(enrollmentService.getAvailableSpecialisations("distance").toString());
+        logger.info(enrollmentService.getAvailableSpecialisations(SpecialisationType.DISTANCE).toString());
 
         try {
             Person dekan = new Employee("Kolesnikov", "Mikhail", EmployeePosition.MANAGER);
@@ -122,31 +126,27 @@ public class Main {
 
         logger.info("\n##### example of the operation of the control class #####");
         logger.info(informationCommiteeService.getEducationIntstituteInfo(university));
-        logger.info(
-                informationCommiteeService.getSpecializationPlanInfo(specializationPlans.get(3)));
+        logger.info(informationCommiteeService.getSpecializationPlanInfo(specializationPlans.get(3)));
         logger.info(informationCommiteeService.getPersonShortName(employee));
 
-        logger.info("###### Interface using example ######");
-        for (Accessible a : specializationPlans) {
-            logger.info(String.format("Is free places accessible: %b", a.isFreePlacesAccessible()));
-            logger.info(String.format("Is paid places accessible: %b", a.isPaidPlacesAccessible()));
-        }
+        logger.info("################# Example: Interface #################");
+        specializationPlans.forEach(sp -> {
+            logger.info(String.format("Is free places accessible: %b \n Is paid places accessible: %b",
+                    sp.isFreePlacesAccessible(), sp.isPaidPlacesAccessible()));
+        });
 
         boolean validationResult = informationCommiteeService.isValidDocument(bachelorEntrantForm);
         logger.info(String.format("Baachelor's entrant form is: %s", validationResult ? "VALID" : "INVALID"));
-
         logger.info(informationCommiteeService.askAboutCurrentDateTime(entrant));
-
         logger.info(String.format("Can entrable to high education: %b", enrollmentService.canEntrableToHighEducation(entrant)));
-
         logger.info("Abbreviation: " + informationCommiteeService.getAbbreviation(university));
 
-        logger.info("Example with try with resourcces");
+        logger.info("#################  Example: Try with resources ################# ");
         try (Unnessesary unnessesary = new Unnessesary()) {
             logger.debug("Do something in try with resources");
         }
 
-        logger.info("##### Generics using example #####");
+        logger.info("################# Example: Generics #################");
         Folder<EntrantForm> entrantFormFolder2021 = new Folder<>();
         entrantFormFolder2021.addDocument(bachelorEntrantForm);
         entrantFormFolder2021.addDocument(masterEntrantForm);
@@ -163,39 +163,129 @@ public class Main {
         FinalEntrantPlan<FullTimeSpecializationPlan> fullTimePlan2021 = new FinalEntrantPlan<>(fullTimeSpecializationPlans, LocalDate.of(2021, 1, 1), employee);
         logger.debug(fullTimePlan2021.getYearPlan());
 
-        logger.info("######### Apache FileUtils StringUtils example #########");
+        logger.info("################# Example: Apache FileUtils StringUtils #################");
 
         Book harryPotterBook = Book.getInstance();
         harryPotterBook.setFileName("J. K. Rowling - Harry Potter 1 - Sorcerer's Stone.txt");
         harryPotterBook.setGenre(Genre.FANTASTIC);
 
-        Map<String, Integer> fileWords = new HashMap<>();
         URI harryPotterPath = Objects.requireNonNull(Main.class.getClassLoader().getResource(harryPotterBook.getFileName())).toURI();
         File harryPotterFile = new File(Objects.requireNonNull(harryPotterPath));
-        Pattern wordPattern = Pattern.compile("[a-zA-Z]+");
 
         List<String> lines = FileUtils.readLines(harryPotterFile, "UTF-8");
-        for (String line : lines) {
-            Matcher matcher = wordPattern.matcher(line);
-            while (matcher.find()) {
-                String word = StringUtils.lowerCase(matcher.group());
-                Integer count = fileWords.get(word);
-                if (Objects.isNull(count)) {
-                    count = 0;
-                }
-                fileWords.put(word, ++count);
-            }
-        }
 
-        Map<String, Integer> sortedWords = fileWords.entrySet().stream().sorted(Map.Entry.comparingByValue())
+        Map<String, Long> fileWords = Stream.of(lines)
+                .flatMap(Collection::stream)
+                .flatMap(str -> Arrays.stream(str.split("\\P{L}+")))
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+        Map<String, Long> sortedWords = fileWords.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue())
+                .peek(logger::debug)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 
-        File outputFile = new File("ofiles/words_length_info.txt");
-        OutputStream outputStream = FileUtils.openOutputStream(outputFile);
-        for (Map.Entry<String, Integer> word : sortedWords.entrySet()) {
-            String outputLine = String.format("%s\t- %d times\n", word.getKey(), word.getValue());
-            outputStream.write(outputLine.getBytes(StandardCharsets.UTF_8));
-            logger.info(outputLine);
-        }
+        Path outputWordsPath = Paths.get("ofiles/words_length_info.txt");
+        Files.write(outputWordsPath,
+                (Iterable<String>) sortedWords.entrySet().stream()
+                        .map(word -> String.format("%s\t- %d times\n", word.getKey(), word.getValue()))::iterator);
+
+        logger.info("################# Example: Reflection #################");
+
+        logger.debug("Get object represent BachelorEntrantForm class");
+        Class<BachelorEntrantForm> bachEntrFormClass = BachelorEntrantForm.class;
+        logger.debug("Get BachelorEntrantForm class constructor");
+        Constructor<?> bachelorEntrantFormConstructor = bachEntrFormClass.getConstructor(
+                Integer.class,
+                Entrant.class,
+                SpecializationPlan.class,
+                boolean.class,
+                Employee.class,
+                LocalDate.class,
+                List.class
+        );
+
+        logger.debug("Create BachelorEntrantForm object");
+        BachelorEntrantForm reflbachelorEntrantForm = (BachelorEntrantForm) bachelorEntrantFormConstructor.newInstance(
+                4, entrant, specializationPlans.get(2), true, employee,
+                LocalDate.of(2021, 10, 28), certificates
+        );
+
+        reflbachelorEntrantForm.setAcceptedDate(LocalDate.of(2020, 12, 13));
+        logger.debug(reflbachelorEntrantForm);
+
+        logger.debug(reflbachelorEntrantForm.getSpecializationPlan());
+
+        logger.info(String.format("BachelorEnrantForm #simpleName() result: %s", bachEntrFormClass.getSimpleName()));
+        logger.info(String.format("BachelorEnrantForm #getClassLoader() result: %s", bachEntrFormClass.getClassLoader()));
+        logger.info(String.format("BachelorEnrantForm #getName() result: %s", bachEntrFormClass.getName()));
+        logger.info(String.format("BachelorEnrantForm #getCanonicalName() result: %s", bachEntrFormClass.getCanonicalName()));
+        logger.info(String.format("BachelorEnrantForm #getMethods() result: %s", Arrays.toString(bachEntrFormClass.getMethods())));
+        logger.info(String.format("BachelorEnrantForm #getFields() result: %s", Arrays.toString(bachEntrFormClass.getFields())));
+        logger.info(String.format("BachelorEnrantForm #getPackage() result: %s", bachEntrFormClass.getPackage()));
+        logger.info(String.format("BachelorEnrantForm #toGenericString() result: %s", bachEntrFormClass.toGenericString()));
+        logger.info(String.format("BachelorEnrantForm #getSuperclass() result: %s", bachEntrFormClass.getSuperclass()));
+        logger.info(String.format("BachelorEnrantForm #isAnonymousClass() result: %s", bachEntrFormClass.isAnonymousClass()));
+
+        logger.debug("Work with BachelorEntrantForm's certificate field😃");
+        Field certificateField = bachEntrFormClass.getDeclaredField("certificates");
+        Class<?> certificateFieldType = certificateField.getType();
+        logger.info(String.format("CertificateField type: %s", certificateFieldType));
+
+        logger.info("################# Example: Functional interface and lambda #################");
+
+        Converter<CentralizeTestingCertificate, HighSchoolCertificate> converter = centraliseCert ->
+        {
+            HighSchoolCertificate certificate = new HighSchoolCertificate(centraliseCert.getId(), 0);
+            certificate.setMark(centraliseCert.getMark());
+            return certificate;
+        };
+
+        logger.debug("Convert Centralize Testing Certificate to High school Certificate");
+        HighSchoolCertificate highSchoolCertificate = converter.convert(new CentralizeTestingCertificate(234134113, Subject.CHEMISTRY, 89));
+        logger.info(highSchoolCertificate);
+
+        logger.debug("Predicate example - check is Entrant form valid");
+        Predicate<EntrantForm> isEntrantFormValid = form -> form.isValidDate() && form.isValidIdentificator();
+        logger.info(isEntrantFormValid.test(bachelorEntrantForm));
+
+        logger.debug("Consumer example - print Person(Employee) name and current date");
+        Consumer<Person> ask = person -> {
+            assert person != null;
+            logger.info(String.format("I'm %s. Current date is %s", person.shortNameFormat(), person.sayCurrentDate()));
+        };
+        ask.accept(employee);
+
+        logger.debug("Supplier example - print Solvd to standard output");
+        display(() -> "Solvd");
+
+        logger.info("################# Example: Stream API #################");
+        List<Certificate> filteredCert = certificates.stream()
+                .filter(cert -> cert.getMark() > 20)
+                .collect(Collectors.toList());
+        logger.debug(filteredCert);
+
+        List<String> departNames = departments.stream()
+                .map(Department::getName)
+                .collect(Collectors.toList());
+        logger.debug(departNames);
+
+        List<String> hpLines = FileUtils.readLines(harryPotterFile, "UTF-8");
+        List<String> filteredWords = hpLines.stream()
+                .flatMap(line -> Stream.of(line.split("[^a-zA-Z]+}")))
+                .limit(15)
+                .collect(Collectors.toList());
+        logger.debug(filteredWords);
+
+        Optional<String> empAnswer = employeeAnswers.values().stream().findFirst();
+        logger.debug(empAnswer.orElse("There are no employee answer"));
+
+        Optional<Date> randomSpecLastUpdate = specializationPlans.stream()
+                .map(SpecializationPlan::getLastUpdate)
+                .findAny();
+        logger.debug(randomSpecLastUpdate.orElseThrow(() -> new RuntimeException("There are no last update date for random specialisation")));
+    }
+
+    public static void display(Supplier<String> supp) {
+        System.out.println(supp.get());
     }
 }

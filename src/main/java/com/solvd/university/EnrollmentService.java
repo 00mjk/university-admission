@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface EnrollmentService {
 
-    List<SpecializationPlan> getAvailableSpecialisations(String specType);
+    List<SpecializationPlan> getAvailableSpecialisations(SpecialisationType specType);
 
     List<SpecializationPlan> getAvailableSpecialisations(Integer mark);
 

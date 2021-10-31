@@ -1,11 +1,16 @@
 package com.solvd.university;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDate;
 import java.util.List;
 
 /**
  * Application for higher education of the 1st stage (Bachelor's degree)
  */
+@Getter
+@Setter
 public class BachelorEntrantForm extends EntrantForm {
 
     private List<Certificate> certificates;
@@ -20,14 +25,6 @@ public class BachelorEntrantForm extends EntrantForm {
             List<Certificate> certificates
     ) {
         super(id, entrant, specializationPlan, paid, issuedBy, acceptedDate);
-        this.certificates = certificates;
-    }
-
-    public List<Certificate> getCertificates() {
-        return certificates;
-    }
-
-    public void setCertificates(List<Certificate> certificates) {
         this.certificates = certificates;
     }
 
@@ -55,10 +52,8 @@ public class BachelorEntrantForm extends EntrantForm {
     }
 
     public Integer getTotalMark() {
-        Integer totalMark = 0;
-        for (Certificate certificate : this.certificates) {
-            totalMark += certificate.getMark();
-        }
-        return totalMark;
+        return certificates.stream()
+                .map(Certificate::getMark)
+                .reduce(0, Integer::sum);
     }
 }

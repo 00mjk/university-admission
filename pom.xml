@@ -7,7 +7,7 @@
 
     <groupId>com.solvd</groupId>
     <artifactId>university-admission</artifactId>
-    <version>3.1-SNAPSHOT</version>
+    <version>4.1-SNAPSHOT</version>
 
     <properties>
         <log4j.version>2.14.1</log4j.version>
@@ -38,6 +38,14 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.22</version>
+            <scope>provided</scope>
+        </dependency>
+
     </dependencies>
 
     <build>

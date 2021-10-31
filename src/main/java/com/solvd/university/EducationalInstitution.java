@@ -1,9 +1,14 @@
 package com.solvd.university;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 
+@Getter
+@Setter
 public abstract class EducationalInstitution implements Abbreviable {
 
     private String name;
@@ -26,30 +31,6 @@ public abstract class EducationalInstitution implements Abbreviable {
     }
 
     public abstract String getEducationalInstitutionType();
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Date getBasedDate() {
-        return basedDate;
-    }
-
-    public void setBasedDate(Date basedDate) {
-        this.basedDate = basedDate;
-    }
-
-    public City getCity() {
-        return city;
-    }
-
-    public void setCity(City city) {
-        this.city = city;
-    }
 
     @Override
     public boolean equals(Object o) {

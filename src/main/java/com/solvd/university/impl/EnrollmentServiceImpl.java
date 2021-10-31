@@ -1,75 +1,52 @@
 package com.solvd.university.impl;
 
 import com.solvd.university.*;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+@Getter
+@Setter
 public class EnrollmentServiceImpl implements EnrollmentService {
 
     private List<SpecializationPlan> specializationPlans;
+
     private List<EntrantForm> entrantForms;
 
     public EnrollmentServiceImpl(List<SpecializationPlan> specializationPlans) {
         this.specializationPlans = specializationPlans;
     }
 
-    public List<SpecializationPlan> getSpecializationPlans() {
-        return specializationPlans;
-    }
-
-    public void setSpecializationPlans(List<SpecializationPlan> specializationPlans) {
-        this.specializationPlans = specializationPlans;
-    }
-
-    public List<EntrantForm> getEntrantForms() {
-        return entrantForms;
-    }
-
-    public void setEntrantForms(List<EntrantForm> entrantForms) {
-        this.entrantForms = entrantForms;
-    }
-
-    /**
-     * @param specType Possible inputs: 'full', 'distance'
-     */
     @Override
-    public List<SpecializationPlan> getAvailableSpecialisations(String specType) {
-        List<SpecializationPlan> availablePlans = new ArrayList<>();
-        String specTypeClass;
+    public List<SpecializationPlan> getAvailableSpecialisations(SpecialisationType specType) {
+        Class<?> specTypeClass;
         switch (specType) {
-            case "full":
-                specTypeClass = "FullTimeSpecializationPlan";
+            case FULL:
+                specTypeClass = FullTimeSpecializationPlan.class;
                 break;
-            case "distance":
-                specTypeClass = "DistanceSpecializationPlan";
+            case DISTANCE:
+                specTypeClass = DistanceSpecializationPlan.class;
                 break;
             default:
-                specTypeClass = "";
+                specTypeClass = Object.class;
                 break;
         }
-        for (SpecializationPlan sp : specializationPlans) {
-            if (sp.getClass().getSimpleName().equals(specTypeClass)) {
-                availablePlans.add(sp);
-            }
-        }
-        return availablePlans;
+        return specializationPlans.stream()
+                .filter(sp -> specTypeClass.equals(sp.getClass()))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<SpecializationPlan> getAvailableSpecialisations(Integer mark) {
+    public List<SpecializationPlan> getAvailableSpecialisations(@NonNull Integer mark) {
         List<SpecializationPlan> availableSpecByType =
-                this.getAvailableSpecialisations("FullTimeSpecializationPlan");
-        List<SpecializationPlan> availableSpecByMark =
-                new ArrayList<>();
-        int spIndex = 0;
-        for (SpecializationPlan sp : availableSpecByType) {
-            if (((FullTimeSpecializationPlan) sp).getMinMark().equals(mark)) {
-                availableSpecByMark.add(sp);
-                spIndex++;
-            }
-        }
-        return availableSpecByMark;
+                this.getAvailableSpecialisations(SpecialisationType.FULL);
+
+        return availableSpecByType.stream()
+                .filter(sp -> mark.equals(((FullTimeSpecializationPlan) sp).getMinMark()))
+                .collect(Collectors.toList());
     }
 
     @Override
