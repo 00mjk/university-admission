@@ -1,10 +1,15 @@
 package com.solvd.university;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class CentralizeTestingCertificate extends Certificate {
 
+    @Getter
+    @Setter
     private Subject subject;
 
     public CentralizeTestingCertificate(Integer id, Subject subject, Integer mark) {
@@ -14,14 +19,6 @@ public class CentralizeTestingCertificate extends Certificate {
 
     public CentralizeTestingCertificate(Integer id, Subject subject, Integer mark, LocalDateTime issuedAt) {
         super(id, mark, issuedAt);
-        this.subject = subject;
-    }
-
-    public Subject getSubject() {
-        return subject;
-    }
-
-    public void setSubject(Subject subject) {
         this.subject = subject;
     }
 

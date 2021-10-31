@@ -113,7 +113,7 @@ public class Main {
         EnrollmentService enrollmentService = new EnrollmentServiceImpl(specializationPlans);
         InformationCommiteeService informationCommiteeService = new InformationCommiteeServiceImpl();
         logger.info("Available specialisations:");
-        logger.info(enrollmentService.getAvailableSpecialisations("distance").toString());
+        logger.info(enrollmentService.getAvailableSpecialisations(SpecialisationType.DISTANCE).toString());
 
         try {
             Person dekan = new Employee("Kolesnikov", "Mikhail", EmployeePosition.MANAGER);
@@ -236,7 +236,7 @@ public class Main {
         logger.debug("Work with BachelorEntrantForm's certificate field😃");
         Field certificateField = bachEntrFormClass.getDeclaredField("certificates");
         Class<?> certificateFieldType = certificateField.getType();
-        logger.info(String.format("CertificaeField type: %s", certificateFieldType));
+        logger.info(String.format("CertificateField type: %s", certificateFieldType));
 
         logger.info("################# Example: Functional interface and lambda #################");
 

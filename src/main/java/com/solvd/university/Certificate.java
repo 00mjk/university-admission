@@ -27,9 +27,6 @@ public abstract class Certificate {
 
     public Certificate(@NonNull Integer id, @NonNull Integer mark, @NonNull LocalDateTime issuedAt) {
         this(id, mark);
-        if (Objects.isNull(issuedAt)) {
-            throw new CertificateInvalidDataException("Certificate data should exists");
-        }
         if (issuedAt.compareTo(LocalDateTime.now()) > 0) {
             throw new CertificateInvalidDataException("Certificate date and time shouldn't be more than current");
         }

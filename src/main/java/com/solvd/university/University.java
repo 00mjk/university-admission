@@ -59,7 +59,8 @@ public class University extends EducationalInstitution {
 
     public String getDepartamentsByString() {
         return departments.stream()
-                .map(Department::getName).collect(Collectors.joining(""));
+                .map(Department::getName)
+                .collect(Collectors.joining(""));
     }
 
     public String getFullUnivercityInfo() {
@@ -68,9 +69,10 @@ public class University extends EducationalInstitution {
             info.append("Department: ")
                     .append(dp.getName())
                     .append("\n")
-                    .append(dp.getSpecializations().stream()
-                            .map(Specialization::getName)
-                            .collect(Collectors.joining("\n"))
+                    .append(
+                            dp.getSpecializations().stream()
+                                    .map(Specialization::getName)
+                                    .collect(Collectors.joining("\n"))
                     );
         });
         return info.toString();

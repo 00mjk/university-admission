@@ -1,20 +1,17 @@
 package com.solvd.university;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.Objects;
 
 public class City {
 
+    @Getter
+    @Setter
     private String name;
 
     public City(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
         this.name = name;
     }
 

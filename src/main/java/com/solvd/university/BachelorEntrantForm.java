@@ -1,5 +1,8 @@
 package com.solvd.university;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -8,6 +11,8 @@ import java.util.List;
  */
 public class BachelorEntrantForm extends EntrantForm {
 
+    @Getter
+    @Setter
     private List<Certificate> certificates;
 
     public BachelorEntrantForm(
@@ -22,15 +27,7 @@ public class BachelorEntrantForm extends EntrantForm {
         super(id, entrant, specializationPlan, paid, issuedBy, acceptedDate);
         this.certificates = certificates;
     }
-
-    public List<Certificate> getCertificates() {
-        return certificates;
-    }
-
-    public void setCertificates(List<Certificate> certificates) {
-        this.certificates = certificates;
-    }
-
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
