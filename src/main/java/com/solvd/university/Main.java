@@ -21,7 +21,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -37,7 +37,6 @@ public class Main {
         cities.add(new City("Brest"));
 
         List<Department> departments = new ArrayList<>();
-
         List<Specialization> specializations = new ArrayList<>();
         try {
             specializations.add(new Specialization("Automation of technological processes and productions"));
@@ -100,17 +99,16 @@ public class Main {
         EntrantForm bachelorEntrantForm =
                 new BachelorEntrantForm(65, entrant, specializationPlans.get(0), true, employee, LocalDate.of(2021, 8, 2), certificates);
 
-        EntrantForm masterEntrantForm =
-                new MasterEntrantForm(
-                        1355235,
-                        entrant,
-                        specializationPlans.get(2),
-                        false,
-                        employee,
-                        LocalDate.of(2020, 6, 30),
-                        specializations.get(1),
-                        LocalDate.now()
-                );
+        EntrantForm masterEntrantForm = new MasterEntrantForm(
+                1355235,
+                entrant,
+                specializationPlans.get(2),
+                false,
+                employee,
+                LocalDate.of(2020, 6, 30),
+                specializations.get(1),
+                LocalDate.now()
+        );
 
         EnrollmentService enrollmentService = new EnrollmentServiceImpl(specializationPlans);
         InformationCommiteeService informationCommiteeService = new InformationCommiteeServiceImpl();
@@ -128,11 +126,10 @@ public class Main {
 
         logger.info("\n##### example of the operation of the control class #####");
         logger.info(informationCommiteeService.getEducationIntstituteInfo(university));
-        logger.info(
-                informationCommiteeService.getSpecializationPlanInfo(specializationPlans.get(3)));
+        logger.info(informationCommiteeService.getSpecializationPlanInfo(specializationPlans.get(3)));
         logger.info(informationCommiteeService.getPersonShortName(employee));
 
-        logger.info("###### Interface using example ######");
+        logger.info("################# Example: Interface #################");
         specializationPlans.forEach(sp -> {
             logger.info(String.format("Is free places accessible: %b \n Is paid places accessible: %b",
                     sp.isFreePlacesAccessible(), sp.isPaidPlacesAccessible()));
@@ -144,12 +141,12 @@ public class Main {
         logger.info(String.format("Can entrable to high education: %b", enrollmentService.canEntrableToHighEducation(entrant)));
         logger.info("Abbreviation: " + informationCommiteeService.getAbbreviation(university));
 
-        logger.info("Example with try with resourcces");
+        logger.info("#################  Example: Try with resources ################# ");
         try (Unnessesary unnessesary = new Unnessesary()) {
             logger.debug("Do something in try with resources");
         }
 
-        logger.info("##### Generics using example #####");
+        logger.info("################# Example: Generics #################");
         Folder<EntrantForm> entrantFormFolder2021 = new Folder<>();
         entrantFormFolder2021.addDocument(bachelorEntrantForm);
         entrantFormFolder2021.addDocument(masterEntrantForm);
@@ -166,7 +163,7 @@ public class Main {
         FinalEntrantPlan<FullTimeSpecializationPlan> fullTimePlan2021 = new FinalEntrantPlan<>(fullTimeSpecializationPlans, LocalDate.of(2021, 1, 1), employee);
         logger.debug(fullTimePlan2021.getYearPlan());
 
-        logger.info("######### Apache FileUtils StringUtils example #########");
+        logger.info("################# Example: Apache FileUtils StringUtils #################");
 
         Book harryPotterBook = Book.getInstance();
         harryPotterBook.setFileName("J. K. Rowling - Harry Potter 1 - Sorcerer's Stone.txt");
@@ -199,7 +196,7 @@ public class Main {
                 (Iterable<String>) sortedWords.entrySet().stream()
                         .map(word -> String.format("%s\t- %d times\n", word.getKey(), word.getValue()))::iterator);
 
-        logger.info("################# Reflection example #################");
+        logger.info("################# Example: Reflection #################");
 
         logger.debug("Get object represent BachelorEntrantForm class");
         Class<BachelorEntrantForm> bachEntrFormClass = BachelorEntrantForm.class;
@@ -213,6 +210,7 @@ public class Main {
                 LocalDate.class,
                 List.class
         );
+
         logger.debug("Create BachelorEntrantForm object");
         BachelorEntrantForm reflbachelorEntrantForm = (BachelorEntrantForm) bachelorEntrantFormConstructor.newInstance(
                 4, entrant, specializationPlans.get(2), true, employee,
@@ -240,7 +238,7 @@ public class Main {
         Class<?> certificateFieldType = certificateField.getType();
         logger.info(String.format("CertificaeField type: %s", certificateFieldType));
 
-        logger.info("################# Functional interface and lambda example #################");
+        logger.info("################# Example: Functional interface and lambda #################");
 
         Converter<CentralizeTestingCertificate, HighSchoolCertificate> converter = centraliseCert ->
         {
@@ -264,11 +262,10 @@ public class Main {
         };
         ask.accept(employee);
 
-        //TODO Supplier
-        //TODO Function
-        //TODO UnaryOperator
+        logger.debug("Supplier example - print Solvd to standard output");
+        display(() -> "Solvd");
 
-        logger.info("################# Stream API example #################");
+        logger.info("################# Example: Stream API #################");
         List<Certificate> filteredCert = certificates.stream()
                 .filter(cert -> cert.getMark() > 20)
                 .collect(Collectors.toList());
@@ -293,5 +290,9 @@ public class Main {
                 .map(SpecializationPlan::getLastUpdate)
                 .findAny();
         logger.debug(randomSpecLastUpdate.orElseThrow(() -> new RuntimeException("There are no last update date for random specialisation")));
+    }
+
+    public static void display(Supplier<String> supp) {
+        System.out.println(supp.get());
     }
 }
