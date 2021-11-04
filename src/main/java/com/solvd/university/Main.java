@@ -290,7 +290,7 @@ public class Main {
 
         logger.debug("################# Example: Java < 8  multithreading #################");
 
-        ConnectionPool connectionPool = ConnectionPool.getInstance();
+        ConnectionPool connectionPool = ConnectionPool.getInstance(5);
         List<Thread> threads = new ArrayList<>();
 
         IntStream.range(0, 100)
@@ -330,7 +330,7 @@ public class Main {
 
         logger.debug("################# Example: Java 8 multithreading #################");
 
-        ExecutorService executor = Executors.newFixedThreadPool(3);
+        ExecutorService executor = Executors.newFixedThreadPool(5);
         List<CompletableFuture<Void>> completableFutures = new ArrayList<>();
         IntStream.range(0, 100)
                 .boxed()
