@@ -40,7 +40,7 @@ public class ConnectionPool {
         return connection;
     }
 
-    public synchronized void releaseConnection(Connection connection) {
+    public void releaseConnection(Connection connection) {
         if (connection != null) {
             synchronized (ConnectionPool.class) {
                 if (availableConnections.contains(connection)) {

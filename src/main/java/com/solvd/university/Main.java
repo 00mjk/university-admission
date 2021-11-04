@@ -306,7 +306,7 @@ public class Main {
                             connection.update();
                             connection.delete();
                         } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            logger.error("Error when try to call #sleep() method in connection methods", e);
                         }
                     });
                     threads.add(thread);

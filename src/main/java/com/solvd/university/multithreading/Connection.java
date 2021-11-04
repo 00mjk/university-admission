@@ -55,6 +55,6 @@ public class Connection implements Runnable {
 
     @Override
     public void run() {
-        System.out.printf("Connection thread  %s was started using <Runnable>", this.name);
+        System.out.printf("Connection thread  %s was started using <Runnable>\n", this.name);
     }
 }
