@@ -2,6 +2,8 @@ package com.solvd.university;
 
 import com.solvd.university.impl.EnrollmentServiceImpl;
 import com.solvd.university.impl.InformationCommiteeServiceImpl;
+import com.solvd.university.multithreading.Connection;
+import com.solvd.university.multithreading.ConnectionPool;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,16 +20,18 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Main {
 
-    public static void main(String[] args) throws PersonInvalidDataException, IOException, URISyntaxException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchFieldException {
+    public static void main(String[] args) throws PersonInvalidDataException, IOException, URISyntaxException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchFieldException, ExecutionException, InterruptedException, TimeoutException {
 
         Logger logger = LogManager.getLogger(Main.class);
 
@@ -283,9 +287,103 @@ public class Main {
                 .map(SpecializationPlan::getLastUpdate)
                 .findAny();
         logger.debug(randomSpecLastUpdate.orElseThrow(() -> new RuntimeException("There are no last update date for random specialisation")));
+
+        logger.debug("################# Example: Java < 8  multithreading #################");
+
+        ConnectionPool connectionPool = ConnectionPool.getInstance(5);
+        List<Thread> threads = new ArrayList<>();
+
+        IntStream.range(0, 100)
+                .boxed()
+                .forEach(index -> {
+                    Connection connection = connectionPool.getConnection();
+                    Thread thread = new Thread(() -> {
+                        System.out.printf("Create thread '%s' using <Thread>\n", connection.toString());
+                        try {
+                            connection.create();
+                            connection.read();
+                            connection.readAll();
+                            connection.update();
+                            connection.delete();
+                        } catch (InterruptedException e) {
+                            logger.error("Error when try to call #sleep() method in connection methods", e);
+                        }
+                    });
+                    threads.add(thread);
+                    thread.start();
+                    connectionPool.releaseConnection(connection);
+                });
+
+        joinThreads(threads);
+
+        IntStream.range(0, 100)
+                .boxed()
+                .forEach(index -> {
+                    Connection connection = connectionPool.getConnection();
+                    Thread thread = new Thread(connection);
+                    threads.add(thread);
+                    thread.start();
+                    connectionPool.releaseConnection(connection);
+                });
+
+        joinThreads(threads);
+
+        logger.debug("################# Example: Java 8 multithreading #################");
+
+        ExecutorService executor = Executors.newFixedThreadPool(5);
+        List<CompletableFuture<Void>> completableFutures = new ArrayList<>();
+        IntStream.range(0, 100)
+                .boxed()
+                .forEach(index -> {
+                    CompletableFuture<Void> completableFuture = CompletableFuture
+                            .supplyAsync(() -> {
+                                System.out.println("Creation connection " + index + " is started");
+                                Connection connection = new Connection("Connection " + index);
+                                sleep(20);
+                                return connection;
+                            }, executor)
+                            .thenAcceptAsync(conn -> {
+                                System.out.println("Creation connection " + conn.toString() + " is finished");
+                            }, executor);
+                    completableFutures.add(completableFuture);
+                });
+
+        for (CompletableFuture<Void> future : completableFutures) {
+            get(future);
+        }
+
+        executor.shutdown();
+        System.out.println("END");
     }
 
     public static void display(Supplier<String> supp) {
         System.out.println(supp.get());
+    }
+
+    private static <T> T get(CompletableFuture<T> future) {
+        T result = null;
+        try {
+            result = future.get(2, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    private static void sleep(int milliseconds) {
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void joinThreads(List<Thread> threads) throws InterruptedException {
+        for (Thread t : threads) {
+            if (t.isAlive()) {
+                t.join();
+            }
+        }
+        threads.clear();
     }
 }
